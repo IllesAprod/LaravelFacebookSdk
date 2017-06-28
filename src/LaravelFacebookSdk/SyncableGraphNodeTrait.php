@@ -1,5 +1,6 @@
 <?php namespace SammyK\LaravelFacebookSdk;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Facebook\GraphNodes\GraphObject;
 use Facebook\GraphNodes\GraphNode;
@@ -112,6 +113,7 @@ trait SyncableGraphNodeTrait
      */
     public static function mapGraphNodeFieldNamesToDatabaseColumnNames(Model $object, array $fields)
     {
+        $fields = array_dot($fields);
         foreach ($fields as $field => $value) {
             if (static::graphNodeFieldIsWhiteListed(static::fieldToColumnName($field))) {
                 $object->{static::fieldToColumnName($field)} = $value;
@@ -134,7 +136,10 @@ trait SyncableGraphNodeTrait
         }
 
         foreach ($data as $key => $value) {
-            if ($value instanceof \DateTime) {
+            if ($key == 'created_time'){
+                $data[$key] = Carbon::parse($data[$key])->format($date_format);
+
+            }elseif ($value instanceof \DateTime) {
                 $data[$key] = $value->format($date_format);
             }
         }
